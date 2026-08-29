@@ -1,72 +1,72 @@
-const express = require ('express');
-const User = require('../models/User.model');
-const router = express.Router();
-const Admin = require('../middleware/admin.middleware');
-const Auth = require('../middleware/auth.middleware');
+const Joi = require('joi');
+const express = require ('express')
 
-router.post('/users/add' , Admin , async (req , res) => {
-    try{
-        const user = new User (req.body);
-        await user.save();
+const ObjectId = Joi.string().hex().length(24).messages({
+    'string.hex': 'Invalid ID format',
+    'string.length': 'Invalid ID format',
+});
 
-        res.status(201).send(user);
-    }catch(e){
-        res.status(400).send(e);
-    }
+//Create New User
 
-})
+const createUserSchema = Joi.object({
+    username: Joi.string().trim().min(2).max(50).required().messages({ 'any.required': 'Username is required' }),
 
-router.get('/users/all' , Admin , async (req , res) => {
-    try{
-        const users = await User.find({});
-        res.status(200).send(users);
-    }catch(e){
-        res.status(500).send(e);
-    }
-})
+    email: Joi.string().email().lowercase().required().messages({ 'string.email': 'Please enter a valid email' }),
 
-router.get('/users/:id' , Admin , async (req , res) => {
-    try{
-        const id = req.params.id;
-        const user = await User.findById(id);
+    password: Joi.string().min(6).max(128).required().messages({ 'string.min': 'Password must be at least 6 characters' }),
 
-        if(!user)
-            return res.status(404).json({ message: "User not found" });
+    phone: Joi.string().trim().min(8).max(20).optional().allow('', null),
 
-        res.status(200).send(user);
-    }catch(e){
-        res.status(400).send(e);
-    }
-})
+    role: Joi.string().valid('admin', 'customer').default('customer'),
 
-router.patch('/users/:id' , Auth , async (req , res) => {
-    try{
-        const id = req.params.id;
-        const update = req.body;
-        const updateUser = await User.findByIdAndUpdate(id , update, {
-            new: true, 
-            runValidators: true 
-        });
+    avatar: Joi.string().uri().optional().allow('', null),
 
-        if(!updateUser)
-            return res.status(404).json({ message: "User not found" });
+    addresses: Joi.array().items(addressSchema).optional(),
+});
 
-        res.status(200).send(updateUser);
-    }catch(e){
-        res.status(400).send(e)
-    }
-})
+//End
 
-router.delete('/users/:id' , Admin , async (req , res) => {
-    try{
-        const id = req.params.id;
-        const deleteUser = await User.findByIdAndDelete(id);
+//Update User Information
 
-        if(!deleteUser)
-            return res.status(404).json({ message: "User not found" });
+const updateUserSchema = Joi.object({
+    username: Joi.string().trim().min(2).max(50).optional(),
 
-        res.status(200).send(deleteUser);
-    }catch(e){
-        res.status(400).send(e)
-    }
-})
+    phone: Joi.string().trim().min(8).max(20).optional().allow('', null),
+
+    avatar: Joi.string().uri().optional().allow('', null),
+
+    addresses: Joi.array().items(addressSchema).optional(),
+
+    role: Joi.string().valid('admin', 'customer').optional(),
+}).min(1);
+
+//End
+
+//Change The Password
+
+const changePasswordSchema = Joi.object({
+    currentPassword: Joi.string().required().messages({ 'any.required': 'Current password is required' }),
+
+    newPassword: Joi.string().min(6).max(128).required().messages({
+      'string.min': 'New password must be at least 6 characters',
+      'any.required': 'New password is required',
+    }),
+
+    confirmPassword: Joi.string().valid(Joi.ref('newPassword')).required().messages({
+      'any.only': 'Confirm password must match new password',
+      'any.required': 'Confirm password is required',
+    }),
+});
+
+//End
+
+const userIdSchema = Joi.object({
+    id: objectId.required(),
+});
+
+module.exports = {
+  createUserSchema,
+  updateUserSchema,
+  changePasswordSchema,
+  userIdSchema,
+};

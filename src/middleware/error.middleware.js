@@ -8,7 +8,7 @@ const errorMiddleware=(err, req, res,next)=>{
    }else if(err.name ==="CastError"){
     statusCode=400;
     message="Invalid ID format";
-   }else if(err.code && err.code ===11002){
+   }else if(err.code && err.code ===11000){
     statusCode=400;
     message="Duplicated value found";
 
@@ -16,7 +16,7 @@ const errorMiddleware=(err, req, res,next)=>{
     statusCode=401;
     message="Invalid token ,Please Login again!";
 
-   }else if(err.name === "TokenExpirationError"){
+   }else if(err.name === "TokenExpiredError"){
     statusCode=401;
     message="Token has expired ,Please Login again!";
    } 

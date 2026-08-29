@@ -48,10 +48,44 @@ const userSchema = new mongoose.Schema(
         },
 
         addresses: [
-            {
-                type: mongoose.Schema.Types.Mixed,
-            },
-        ],
+    {
+        fullName: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+
+        phone: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+
+        country: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+
+        city: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+
+        address: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+
+        postalCode: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+    },
+],
 
         wishlist: [
             {

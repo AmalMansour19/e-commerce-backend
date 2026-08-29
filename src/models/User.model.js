@@ -36,7 +36,11 @@ const userSchema = new mongoose.Schema(
             trim: true,
         },
 
-        
+        avatar: {
+            type: String,
+            trim: true,
+            default: "https://placehold.co/150x150",
+        },
 
         role: {
             type: String,
@@ -91,10 +95,10 @@ const userSchema = new mongoose.Schema(
             },
         ],
 
-        avatar: {
-            type: String,
-            trim: true,
-            default: "https://placehold.co/150x150",
+        
+        isVerified: {
+            type: Boolean,
+            default: false,
         },
 
         resetPasswordToken: {

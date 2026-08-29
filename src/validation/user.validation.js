@@ -1,9 +1,19 @@
 const Joi = require('joi');
-const express = require ('express')
 
-const ObjectId = Joi.string().hex().length(24).messages({
+const objectId = Joi.string().hex().length(24).messages({
     'string.hex': 'Invalid ID format',
     'string.length': 'Invalid ID format',
+});
+
+//Create Address
+
+const addressSchema = Joi.object({
+  fullName: Joi.string().trim().min(2).max(100).required(),
+  phone: Joi.string().trim().min(8).max(20).required(),
+  country: Joi.string().trim().required(),
+  city: Joi.string().trim().required(),
+  address: Joi.string().trim().required(),
+  postalCode: Joi.string().trim().required(),
 });
 
 //Create New User

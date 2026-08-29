@@ -48,44 +48,44 @@ const userSchema = new mongoose.Schema(
         },
 
         addresses: [
-    {
-        fullName: {
-            type: String,
-            required: true,
-            trim: true,
-        },
+            {
+                fullName: {
+                    type: String,
+                    required: true,
+                    trim: true,
+                },
 
-        phone: {
-            type: String,
-            required: true,
-            trim: true,
-        },
+                phone: {
+                    type: String,
+                    required: true,
+                    trim: true,
+                },
 
-        country: {
-            type: String,
-            required: true,
-            trim: true,
-        },
+                country: {
+                    type: String,
+                    required: true,
+                    trim: true,
+                },
 
-        city: {
-            type: String,
-            required: true,
-            trim: true,
-        },
+                city: {
+                    type: String,
+                    required: true,
+                    trim: true,
+                },
 
-        address: {
-            type: String,
-            required: true,
-            trim: true,
-        },
+                address: {
+                    type: String,
+                    required: true,
+                    trim: true,
+                },
 
-        postalCode: {
-            type: String,
-            required: true,
-            trim: true,
-        },
-    },
-],
+                postalCode: {
+                    type: String,
+                    required: true,
+                    trim: true,
+                },
+            },
+        ],
 
         wishlist: [
             {
@@ -94,9 +94,10 @@ const userSchema = new mongoose.Schema(
             },
         ],
 
-        isVerified: {
-            type: Boolean,
-            default: false,
+        avatar: {
+            type: String,
+            trim: true,
+            default: "https://placehold.co/150x150",
         },
 
         resetPasswordToken: {

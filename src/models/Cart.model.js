@@ -68,7 +68,7 @@ cartSchema.virtual("itemCount").get(function () {
   return this.calculateItemCount();
 });
 
-cartSchema.methods.addItem = (item) => {
+cartSchema.methods.addItem = function (item) {
   const itemIndex = this.items.findIndex(
     (cartItem) => cartItem.product.toString() === item.product.toString(),
   );
@@ -80,7 +80,7 @@ cartSchema.methods.addItem = (item) => {
   }
 };
 
-cartSchema.methods.calculateSubtotal = () => {
+cartSchema.methods.calculateSubtotal = function () {
   const cart = this;
   let subtotal = 0;
 
@@ -91,7 +91,7 @@ cartSchema.methods.calculateSubtotal = () => {
   return subtotal;
 };
 
-cartSchema.methods.calculateDiscountAmount = () => {
+cartSchema.methods.calculateDiscountAmount = function () {
   const subtotal = this.calculateSubtotal();
 
   if (
@@ -113,19 +113,17 @@ cartSchema.methods.calculateDiscountAmount = () => {
   return 0;
 };
 
-cartSchema.methods.calculateTotal = () => {
+cartSchema.methods.calculateTotal = function () {
   const subtotal = this.calculateSubtotal();
   const discountAmount = this.calculateDiscountAmount();
 
   return subtotal - discountAmount;
 };
 
-cartSchema.methods.calculateItemCount = () => {
+cartSchema.methods.calculateItemCount = function () {
   const cart = this;
 
-  return cart.items.reduce((total, item) => {
-    total + item.quantity;
-  }, 0);
+  return cart.items.reduce((total, item) => total + item.quantity, 0);
 };
 
 module.exports = mongoose.model("Cart", cartSchema);

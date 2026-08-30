@@ -2,6 +2,10 @@ const mongoose=require("mongoose")
 let wishListSchema = new mongoose.Schema({
     user : {
          type : mongoose.Schema.Types.ObjectId,
+
+         type : mongoose.
+         Schema.Types.ObjectId,
+
           ref : "User",
           unique: true,
           index:true,
@@ -11,7 +15,8 @@ let wishListSchema = new mongoose.Schema({
         , ref : "Product"
 }],
 
-}) 
+}) ;
+
 wishListSchema.pre(/^find/,function(next){
     this.populate("products")
     next()
@@ -19,3 +24,4 @@ wishListSchema.pre(/^find/,function(next){
 
 const WishList=mongoose.model("WishList",wishListSchema)
 module.exports=WishList
+

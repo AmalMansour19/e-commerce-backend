@@ -45,7 +45,6 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: [true, "Product name is required"],
       trim: true,
-      unique: true,
       maxlength: [200, "Product name cannot exceed 200 characters"],
     },
     slug: {
@@ -144,11 +143,26 @@ const productSchema = new mongoose.Schema(
   },
 );
 
-productSchema.pre("save", function (next) {
-  if (this.isModified("name")) {
-    this.slug = slugify(this.name, { lower: true });
-    next();
+productSchema.pre("save", async function generateSlug(next) {
+  if (!this.isModified("name")) {
+    return next();
   }
+
+  const baseSlug = slugify(this.name, { lower: true, strict: true });
+  let candidateSlug = baseSlug;
+  let suffix = 0;
+
+  // Guard against slug collisions with other documents
+  const ProductModel = this.constructor;
+  while (
+    await ProductModel.exists({ slug: candidateSlug, _id: { $ne: this._id } })
+  ) {
+    suffix += 1;
+    candidateSlug = `${baseSlug}-${suffix}`;
+  }
+
+  this.slug = candidateSlug;
+  next();
 });
 
 productSchema.methods.calcAverageRating = function calcAverageRating() {

@@ -1,17 +1,21 @@
-import mongoose, { Mongoose } from "mongoose";
+const mongoose=require("mongoose")
 let wishListSchema = new mongoose.Schema({
-    userId : {
-         type : mongoose.
-         Schema.Types.ObjectId,
+    user : {
+         type : mongoose.Schema.Types.ObjectId,
           ref : "User",
           unique: true,
           index:true,
         },
-    productId : [{
+    products : [{
         type : mongoose.Schema.Types.ObjectId 
         , ref : "Product"
 }],
 
 }) 
-const WishList=Mongoose.model("WishList",wishListSchema)
+wishListSchema.pre(/^find/,function(next){
+    this.populate("products")
+    next()
+})
+
+const WishList=mongoose.model("WishList",wishListSchema)
 module.exports=WishList

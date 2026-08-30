@@ -27,7 +27,8 @@ items:[
     }
 ]  ,
 shippingAddress:{
-    fullName:{
+    type:{
+        fullName:{
         type:String
     }
     ,
@@ -44,6 +45,8 @@ shippingAddress:{
     city:{type:String},
     address:{type:String},
     postalCode:{type:String}
+    },
+    required:true
 },
 paymentMethod:{
     type:String,
@@ -53,12 +56,14 @@ paymentMethod:{
 paymentStatus:{
     type:String,
     enum:["pending","paid","failed","refunded"],
+    default:"pending"
 },
 transactionId:{
     type:String
 },
 subtotal:{
     type :Number,
+    required:true
 },
 shippingFee:{
     type :Number,
@@ -81,7 +86,8 @@ totalPrice:{
     type:Number,
     default : function (){
         return this.subtotal + this.shippingFee + this.tax - this.discount
-    }
+    },
+    required:true
 },
 status:{
     type:String ,
@@ -93,11 +99,11 @@ status:{
         "delivered",
         "cancelled",
         "returned"
-    ]
+    ],
+    default:"pending"
     },
     paidAt:{
         type:Date
-
     },
     deliveredAt: {
         type: Date

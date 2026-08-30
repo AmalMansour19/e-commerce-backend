@@ -2,20 +2,24 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User.model');
 const auth = async (req, res, next) => {
     try {
-        const token = req.header('Authorization').replace('Bearer ', '');
-        const decode = jwt.verify(token, 'islam500');
+        const authHeader = req.header('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer')) {
+    return res.status(401).json({
+        error: 'Please authenticate'});
+    }
+        const token = authHeader.replace('Bearer ', '');
+        const decode = jwt.verify(token, process.env.JWT_SECRET);
         const user = await User.findOne({
-            _id: decode._id,
-            tokens: token
-        });
+           _id: decode._id
+           });
         if (!user) {
-            throw new Error();
-        }
+              return res.status(401).json({
+                error: 'Please authenticate'});}
         req.user = user;
         req.token = token;
         next();
     } catch (e) {
-        res.status(401).send({
-            error: 'Please authenticate' }); 
-        }};
-module.exports = auth;
+        res.status(401).json({
+            error: 'Please authenticate'
+        }); } };
+       module.exports = auth;

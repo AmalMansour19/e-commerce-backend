@@ -48,7 +48,11 @@ const productSchema = new mongoose.Schema(
       unique: true,
       maxlength: [200, "Product name cannot exceed 200 characters"],
     },
-    slug: String,
+    slug: {
+      type: String,
+      unique: true,
+      trim: true,
+    },
     shortDescription: {
       type: String,
       required: [true, "Short description is required"],
@@ -101,24 +105,21 @@ const productSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
-    subCategory: {
+    subcategory: {
       type: String,
       lowercase: true,
       trim: true,
     },
     brand: String,
     tags: [String],
-    reviews: {
-      type: [reviewSchema],
-      ref: "Review",
-    },
+    reviews: [reviewSchema],
     averageRating: {
       type: Number,
       min: 0,
       max: 5,
     },
     numReviews: {
-      type: String,
+      type: Number,
       default: 0,
       min: 0,
     },
@@ -151,7 +152,7 @@ productSchema.pre("save", function (next) {
 });
 
 productSchema.methods.calcAverageRating = function calcAverageRating() {
-  const reviews = this.review || [];
+  const reviews = this.reviews || [];
   this.numReviews = reviews.length;
 
   if (!reviews.length) {

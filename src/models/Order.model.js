@@ -6,8 +6,9 @@ user:{
     ref:"User",
     required:true,
 },
-items:[
-    {
+items:{
+    type:[
+     {
         name:{
             type:String,
             required:true
@@ -25,7 +26,16 @@ items:[
             min:1
         }
     }
-]  ,
+] , 
+required:true
+,
+    validate: {
+        validator: function (items) {
+            return items.length > 0;
+        },
+        message: "Order must contain at least one item"
+    }
+},
 shippingAddress:{
     type:{
         fullName:{

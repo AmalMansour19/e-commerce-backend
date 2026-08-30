@@ -1,13 +1,13 @@
 import mongoose, { Mongoose } from "mongoose";
 let wishListSchema = new mongoose.Schema({
-    userId : {
+    user : {
          type : mongoose.
          Schema.Types.ObjectId,
           ref : "User",
           unique: true,
           index:true,
         },
-    productId : [{
+    products : [{
         type : mongoose.Schema.Types.ObjectId 
         , ref : "Product"
 }],

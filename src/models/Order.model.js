@@ -39,11 +39,13 @@ required:true
 shippingAddress:{
     type:{
         fullName:{
-        type:String
+        type:String,
+        required:true
     }
     ,
     phone:{
         type:String,
+        required:true,
         validate:{
             validator:function (value){
                 return /^[0-9]{11}$/.test(value)
@@ -51,10 +53,23 @@ shippingAddress:{
             message:"Invalid phone number"
         }
     },
-    country:{type:String},
-    city:{type:String},
-    address:{type:String},
-    postalCode:{type:String}
+    country:{
+        type:String ,
+    required:true
+    
+    },
+    city:{
+        type:String ,
+    required:true
+    
+    },
+    address:{
+        type:String ,
+    required:true
+    
+    },
+    postalCode:{
+        type:String    }
     },
     required:true
 },

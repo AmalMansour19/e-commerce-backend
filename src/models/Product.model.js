@@ -143,9 +143,9 @@ const productSchema = new mongoose.Schema(
   },
 );
 
-productSchema.pre("save", async function generateSlug(next) {
+productSchema.pre("save", async function generateSlug() {
   if (!this.isModified("name")) {
-    return next();
+    return ;
   }
 
   const baseSlug = slugify(this.name, { lower: true, strict: true });
@@ -162,7 +162,6 @@ productSchema.pre("save", async function generateSlug(next) {
   }
 
   this.slug = candidateSlug;
-  next();
 });
 
 productSchema.methods.calcAverageRating = function calcAverageRating() {

@@ -14,8 +14,7 @@ const registerSchema = Joi.object({
     .min(8)
     .required(),
 
-  phone: Joi.string()
-    .required(),
+  phone: Joi.string(),
 });
 
 const loginSchema = Joi.object({

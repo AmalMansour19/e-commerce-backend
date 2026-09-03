@@ -1,4 +1,4 @@
-const Joi = require("joi")
+import Joi from "joi";
 const productValidation = Joi.object({
 
   //Required fields
@@ -39,9 +39,9 @@ const productValidation = Joi.object({
     .lowercase()
     .required(),
 
-  createdBy:Joi.string()
-    .pattern(/^[0-9a-fA-F]{24}$/)
-    .required(),
+  // createdBy:Joi.string()           => in controller
+  //   .pattern(/^[0-9a-fA-F]{24}$/)
+  //   .required(),
 
     
   //Optional fields
@@ -83,6 +83,22 @@ const productValidation = Joi.object({
 
 });
 
-module.exports =productValidation;
 
+const updateProductValidation = productValidation
+  .fork(
+    [
+      "name",
+      "shortDescription",
+      "description",
+      "price",
+      "stock",
+      "images",
+      "category",
+    ],
+    (schema) => schema.optional()
+  )
+  .min(1);
+
+export { updateProductValidation };
+export default productValidation;
 

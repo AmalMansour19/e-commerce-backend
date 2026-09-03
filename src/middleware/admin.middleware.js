@@ -13,6 +13,4 @@ const adminPerms = (req, res,next) =>{
 }
 
 
-module.exports = {
-    adminPerms
-}
+export default  adminPerms

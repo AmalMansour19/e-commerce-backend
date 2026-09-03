@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const slugify = require("slugify");
+import mongoose from "mongoose";
+import slugify from "slugify";
 
 const reviewSchema = new mongoose.Schema(
   {
@@ -196,4 +196,4 @@ productSchema.index({ createdAt: -1 });
 
 const Product = mongoose.model("Product", productSchema);
 
-module.exports = Product;
+export default Product;

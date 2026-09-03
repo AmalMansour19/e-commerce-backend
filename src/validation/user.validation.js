@@ -1,4 +1,4 @@
-const Joi = require('joi');
+import Joi from "joi";
 
 const objectId = Joi.string().hex().length(24).messages({
     'string.hex': 'Invalid ID format',
@@ -23,7 +23,7 @@ const createUserSchema = Joi.object({
 
     email: Joi.string().email().lowercase().required().messages({ 'string.email': 'Please enter a valid email' }),
 
-    password: Joi.string().min(6).max(128).required().messages({ 'string.min': 'Password must be at least 6 characters' }),
+    password: Joi.string().min(8).max(128).required().messages({ 'string.min': 'Password must be at least 6 characters' }),
 
     phone: Joi.string().trim().min(8).max(20).optional().allow('', null),
 
@@ -74,7 +74,7 @@ const userIdSchema = Joi.object({
     id: objectId.required(),
 });
 
-module.exports = {
+export default   {
   createUserSchema,
   updateUserSchema,
   changePasswordSchema,

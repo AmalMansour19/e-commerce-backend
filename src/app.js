@@ -1,6 +1,9 @@
 import express from "express";
 import cors from  "cors";
+import auth from "./middleware/auth.middleware.js";
+import cartRoutes from "./routes/cart.routes.js";
 
+const PORT = process.env.PORT || 3000;
 const app= express()
 
 
@@ -8,13 +11,13 @@ app.use(cors())
 app.use(express.json())
 
 
-app.use("/auth", authRoutes);
-app.use("/users", userRoutes);
-app.use("/products", productRoutes);
-app.use("/carts", cartRoutes);
-app.use("/wishlists", wishlistRoutes);
-app.use("/orders", orderRoutes);
-app.use("/admin", adminRoutes);
+// app.use("/auth", authRoutes);
+// app.use("/users", userRoutes);
+// app.use("/products", productRoutes);
+app.use("/carts", auth , cartRoutes);
+// app.use("/wishlists", wishlistRoutes);
+// app.use("/orders", orderRoutes);
+// app.use("/admin", adminRoutes);
 
 
 
@@ -24,4 +27,7 @@ app.get("/", (req,res)=>{
     })
 })
 
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
 export default app;

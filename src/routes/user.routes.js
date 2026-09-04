@@ -10,13 +10,13 @@ const {createUserSchema , updateUserSchema , changePasswordSchema, userIdSchema}
 
 router.post('/users/add' , Admin , async (req , res) => {
     try{
-        const {error , value} = createUserSchema.validate(req.body)
+        const isValid = createUserSchema.validate(req.body)
 
-        if(error)
-            return res.status(400).json({ message: error.details[0].message });
+        if(isValid.error)
+            return res.status(400).json({ message: isValid.error.details[0].message });
 
 
-        const user = new User (value);
+        const user = new User (isValid.value);
         await user.save();
 
         res.status(201).send(user);
@@ -45,12 +45,12 @@ router.get('/users/all' , Admin , async (req , res) => {
 
 router.get('/users/:id' , Admin , async (req , res) => {
     try{
-        const {error , value} = userIdSchema.validate({id: req.params.id})
+        const idValidation = userIdSchema.validate({id: req.params.id})
 
-        if(error)
-            return res.status(400).json({ message: error.details[0].message });
+        if(idValidation.error)
+            return res.status(400).json({ message: idValidation.error.details[0].message });
 
-        const id = value.id;
+        const id = idValidation.value.id;
         const user = await User.findById(id);
 
         if(!user)
@@ -68,18 +68,18 @@ router.get('/users/:id' , Admin , async (req , res) => {
 
 router.patch('/users/:id' , Auth , async (req , res) => {
     try{
-        const {error , value} = userIdSchema.validate({id: req.params.id})
+        const idValidation = userIdSchema.validate({id: req.params.id})
 
-        if(error)
-            return res.status(400).json({ message: error.details[0].message });
+        if(idValidation.error)
+            return res.status(400).json({ message: idValidation.error.details[0].message });
 
-        const id = value.id;
-        const {error: error2, value: value2} = updateUserSchema.validate(req.body);
+        const id = idValidation.value.id;
+        const isValid = updateUserSchema.validate(req.body);
 
-        if(error2)
-            return res.status(400).json({ message: error2.details[0].message });
+        if(isValid.error)
+            return res.status(400).json({ message: isValid.error.details[0].message });
 
-        const updateUser = await User.findByIdAndUpdate(id , value2, {
+        const updateUser = await User.findByIdAndUpdate(id , isValid.value, {
             new: true, 
             runValidators: true 
         });
@@ -137,12 +137,12 @@ router.patch('/users/:id/password' , Auth , async (req , res) => {
 
 router.delete('/users/:id' , Admin , async (req , res) => {
     try{
-        const {error , value} = userIdSchema.validate({id: req.params.id})
+        const idValidation = userIdSchema.validate({id: req.params.id})
 
-        if(error)
-            return res.status(400).json({ message: error.details[0].message });
+        if(idValidation.error)
+            return res.status(400).json({ message: idValidation.error.details[0].message });
 
-        const id = value.id;
+        const id = idValidation.value.id;
         const deleteUser = await User.findByIdAndDelete(id);
 
         if(!deleteUser)

@@ -21,7 +21,7 @@ router.post('/users/add' , Admin , async (req , res) => {
 
         res.status(201).send(user);
     }catch(e){
-        res.status(400).send(e);
+        res.status(500).send(e);
     }
 
 })
@@ -58,7 +58,7 @@ router.get('/users/:id' , Admin , async (req , res) => {
 
         res.status(200).send(user);
     }catch(e){
-        res.status(400).send(e);
+        res.status(500).send(e);
     }
 })
 
@@ -74,10 +74,10 @@ router.patch('/users/:id' , Auth , async (req , res) => {
             return res.status(400).json({ message: error.details[0].message });
 
         const id = value.id;
-        const {error2 , value2} = updateUserSchema.validate(req.body);
+        const {error: error2, value: value2} = updateUserSchema.validate(req.body);
 
         if(error2)
-            return res.status(400).json({ message: error.details[0].message });
+            return res.status(400).json({ message: error2.details[0].message });
 
         const updateUser = await User.findByIdAndUpdate(id , value2, {
             new: true, 
@@ -89,7 +89,7 @@ router.patch('/users/:id' , Auth , async (req , res) => {
 
         res.status(200).send(updateUser);
     }catch(e){
-        res.status(400).send(e)
+        res.status(500).send(e)
     }
 })
 
@@ -97,7 +97,7 @@ router.patch('/users/:id' , Auth , async (req , res) => {
 
 //Update Password
 
-router.patch('/users/:id/password' , Auth , validate(userIdSchema, 'params') , validate(changePasswordSchema) , async (req , res) => {
+router.patch('/users/:id/password' , Auth , async (req , res) => {
     try{
         const idValidation = userIdSchema.validate({
             id: req.params.id
@@ -121,15 +121,15 @@ router.patch('/users/:id/password' , Auth , validate(userIdSchema, 'params') , v
         const isMatch = await user.comparePassword(currentPassword);
 
         if(!isMatch)
-            return res.status(404).json({ message: "Password is incorrect" });
+            return res.status(400).json({ message: "Password is incorrect" });
 
         user.password = newPassword;
-        
+
         await user.save();
 
         res.status(200).json({ message: "Password updated successfully" });
     }catch(e){
-        res.status(400).send(e);
+        res.status(500).send(e);
     }
 })
 
@@ -150,7 +150,7 @@ router.delete('/users/:id' , Admin , async (req , res) => {
 
         res.status(200).send(deleteUser);
     }catch(e){
-        res.status(400).send(e)
+        res.status(500).send(e)
     }
 })
 

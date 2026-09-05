@@ -29,7 +29,7 @@ const addItemToCart=async (req,res,next)=>{
    try{
     const {productId,quantity}=req.body;
 
-    if(!productId || !quantity ||quantity<=0){
+    if(!productId || !quantity ||quantity<=0 ||!Number.isInteger(quantity)){
      const  error=new Error("ProductId and quantity are required and quantity should be greater than 0");
      error.statusCode=400;
      return next(error);
@@ -58,7 +58,7 @@ const addItemToCart=async (req,res,next)=>{
   cart.addItem({
     product:product._id,
     name:product.name,
-    price:product.price,
+    price:product.discountPrice ?? product.price,
     image:product.images && product.images.length>0 ? product.images[0].url : "",
     quantity,
   })

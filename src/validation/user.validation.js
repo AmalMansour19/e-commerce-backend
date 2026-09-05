@@ -1,3 +1,4 @@
+
 import Joi from "joi";
 
 const objectId = Joi.string().hex().length(24).messages({
@@ -23,7 +24,7 @@ const createUserSchema = Joi.object({
 
     email: Joi.string().email().lowercase().required().messages({ 'string.email': 'Please enter a valid email' }),
 
-    password: Joi.string().min(8).max(128).required().messages({ 'string.min': 'Password must be at least 6 characters' }),
+    password: Joi.string().min(8).max(128).required().messages({ 'string.min': 'Password must be at least 8 characters' }),
 
     phone: Joi.string().trim().min(8).max(20).optional().allow('', null),
 
@@ -45,9 +46,7 @@ const updateUserSchema = Joi.object({
 
     avatar: Joi.string().uri().optional().allow('', null),
 
-    addresses: Joi.array().items(addressSchema).optional(),
-
-    role: Joi.string().valid('admin', 'customer').optional(),
+    addresses: Joi.array().items(addressSchema).optional()
 }).min(1);
 
 //End
@@ -57,8 +56,8 @@ const updateUserSchema = Joi.object({
 const changePasswordSchema = Joi.object({
     currentPassword: Joi.string().required().messages({ 'any.required': 'Current password is required' }),
 
-    newPassword: Joi.string().min(6).max(128).required().messages({
-      'string.min': 'New password must be at least 6 characters',
+    newPassword: Joi.string().min(8).max(128).required().messages({
+      'string.min': 'New password must be at least 8 characters',
       'any.required': 'New password is required',
     }),
 

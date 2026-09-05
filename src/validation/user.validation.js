@@ -45,9 +45,7 @@ const updateUserSchema = Joi.object({
 
     avatar: Joi.string().uri().optional().allow('', null),
 
-    addresses: Joi.array().items(addressSchema).optional(),
-
-    role: Joi.string().valid('admin', 'customer').optional(),
+    addresses: Joi.array().items(addressSchema).optional()
 }).min(1);
 
 //End

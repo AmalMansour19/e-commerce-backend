@@ -11,15 +11,21 @@ import {
 async function cleanUpImages(images) {
   if (images.length > 0) {
     await Promise.all(
-      images.map((image) => deleteFromCloudinary(image.public_id)),
+      images.map((image) => {
+        if (typeof image === "string") {
+          return deleteFromCloudinary(image);
+        }
+
+        return deleteFromCloudinary(image.public_id);
+      }),
     );
   }
 }
 
 export async function CreateProduct(req, res) {
-  try {
-    let images = [];
+  let images = [];
 
+  try {
     if (req.files?.length > 0) {
       images = await uploadMultipleToCloudinary(req.files);
     }
@@ -142,6 +148,8 @@ export async function GetProductById(req, res) {
 }
 
 export async function UpdateProduct(req, res) {
+  let newImages = [];
+
   try {
     const product = await Product.findById(req.params.id);
 
@@ -151,7 +159,6 @@ export async function UpdateProduct(req, res) {
         .send({ success: false, message: "Product not found" });
     }
 
-    let newImages = [];
     if (req.files?.length > 0) {
       newImages = await uploadMultipleToCloudinary(req.files);
     }

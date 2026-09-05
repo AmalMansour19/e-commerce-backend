@@ -18,7 +18,7 @@ const productRoutes = express.Router();
 productRoutes.post("/", auth, adminPerms, upload.array("images", 5), CreateProduct);
 productRoutes.get("/", GetAllProducts);
 productRoutes.get("/:id", GetProductById);
-productRoutes.put("/update/:id", auth, adminPerms, upload.array("images", 5), UpdateProduct);
+productRoutes.patch("/update/:id", auth, adminPerms, upload.array("images", 5), UpdateProduct);
 productRoutes.delete("/:id", auth, adminPerms, DeleteProduct);
 
 // Search

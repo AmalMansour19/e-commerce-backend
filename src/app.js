@@ -1,5 +1,6 @@
 import express from "express";
 import cors from  "cors";
+import auth from "./middleware/auth.middleware.js";
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import productRoutes from "./routes/product.routes.js";
@@ -18,7 +19,7 @@ app.use(express.json())
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.use("/products", productRoutes);
-app.use("/carts", cartRoutes);
+app.use("/carts",auth , cartRoutes);
 app.use("/wishlists", wishlistRoutes);
 app.use("/orders", orderRoutes);
 app.use("/admin", adminRoutes);

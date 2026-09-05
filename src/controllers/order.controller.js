@@ -5,6 +5,7 @@ import Cart from "../models/Cart.model.js";
 import Product from "../models/Product.model.js";
 
 const createOrder = async (req, res, next) => {
+    let session;
     try {
         const { shippingAddress, paymentMethod, customerNote } = req.body;
         const cart = await Cart.findOne({user: req.user._id}).populate('items.product');
@@ -23,7 +24,7 @@ const createOrder = async (req, res, next) => {
             }
         })
 
-        const session = await mongoose.startSession();
+        session = await mongoose.startSession();
         session.startTransaction();
 
         const orderItems = cart.items.map((item) => ({
@@ -87,7 +88,19 @@ const validOrderStatuses = [
 const getOrders = async (req,res,next) => {
     try {
         const page = parseInt(req.query.page) || 1;
+        if (page < 1) {
+            const error = new Error("Page must be a positive number");
+            error.statusCode = 400;
+            return next(error);
+        }
+
         const limit = parseInt(req.query.limit) || 10;
+        if (limit < 1) {
+            const error = new Error("Limit must be a positive number");
+            error.statusCode = 400;
+            return next(error);
+        }
+
         const skip = (page - 1) * limit;
 
         const filter = {user: req.user._id};
@@ -151,6 +164,7 @@ const getOrderById =async (req,res,next) => {
 
 
 const cancelOrder =async (req,res,next) => {
+    let session;
     try{
         const order =await Order.findById(req.params.id);
 
@@ -173,17 +187,17 @@ const cancelOrder =async (req,res,next) => {
             return next(error);
         }
 
-        let session = await mongoose.startSession();
+        session = await mongoose.startSession();
         session.startTransaction();
 
-        order.items.forEach(async (item) => {
+        for (const item of order.items){
             const product = await Product.findById(item.product).session(session);
 
             if (product){
                 product.stock += item.quantity;
                 await product.save({ session });
             }
-        })
+        }
 
         order.status = "cancelled";
         order.cancelledAt = new Date();

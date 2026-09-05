@@ -1,14 +1,15 @@
-const express = require ('express');
-const User = require('../models/User.model');
+import express from "express"
+import User from "../models/User.model.js"
+import Admin from "../middleware/admin.middleware.js"
+import Auth from "../middleware/auth.middleware.js"
+import {createUserSchema , updateUserSchema , changePasswordSchema, userIdSchema} from "../validation/user.validation.js"
+
 const router = express.Router();
-const Admin = require('../middleware/admin.middleware');
-const Auth = require('../middleware/auth.middleware');
-const {createUserSchema , updateUserSchema , changePasswordSchema, userIdSchema} = require('../validation/user.validation')
 
 
 //Add New User
 
-router.post('/users/add' , Admin , async (req , res) => {
+router.post('/add' , Admin , async (req , res) => {
     try{
         const isValid = createUserSchema.validate(req.body)
 
@@ -30,7 +31,7 @@ router.post('/users/add' , Admin , async (req , res) => {
 
 //Get All Users
 
-router.get('/users/all' , Admin , async (req , res) => {
+router.get('/all' , Admin , async (req , res) => {
     try{
         const users = await User.find({});
         res.status(200).send(users);
@@ -43,7 +44,7 @@ router.get('/users/all' , Admin , async (req , res) => {
 
 //Get User By His Id
 
-router.get('/users/:id' , Admin , async (req , res) => {
+router.get('/:id' , Admin , async (req , res) => {
     try{
         const idValidation = userIdSchema.validate({id: req.params.id})
 
@@ -66,7 +67,7 @@ router.get('/users/:id' , Admin , async (req , res) => {
 
 //Change User Information
 
-router.patch('/users/:id' , Auth , async (req , res) => {
+router.patch('/:id' , Auth , async (req , res) => {
     try{
         const idValidation = userIdSchema.validate({id: req.params.id})
 
@@ -78,6 +79,9 @@ router.patch('/users/:id' , Auth , async (req , res) => {
 
         if(isValid.error)
             return res.status(400).json({ message: isValid.error.details[0].message });
+
+        if(id.toString() !== req.user._id.toString())
+            return res.status(403).json({ message: "Unauthorized access." });
 
         const updateUser = await User.findByIdAndUpdate(id , isValid.value, {
             new: true, 
@@ -97,15 +101,8 @@ router.patch('/users/:id' , Auth , async (req , res) => {
 
 //Update Password
 
-router.patch('/users/:id/password' , Auth , async (req , res) => {
+router.patch('/password' , Auth , async (req , res) => {
     try{
-        const idValidation = userIdSchema.validate({
-            id: req.params.id
-        });
-
-        if(idValidation.error)
-            return res.status(400).json({ message: idValidation.error.details[0].message });
-
         const passwordValidation = changePasswordSchema.validate(req.body);
 
         if(passwordValidation.error)
@@ -113,7 +110,7 @@ router.patch('/users/:id/password' , Auth , async (req , res) => {
 
         const { currentPassword, newPassword } = passwordValidation.value;
 
-        const user = await User.findById(idValidation.value.id);
+        const user = await User.findById(req.user._id);
 
         if(!user)
             return res.status(404).json({ message: "User not found" });
@@ -135,7 +132,7 @@ router.patch('/users/:id/password' , Auth , async (req , res) => {
 
 //Delete User By His Id
 
-router.delete('/users/:id' , Admin , async (req , res) => {
+router.delete('/:id' , Admin , async (req , res) => {
     try{
         const idValidation = userIdSchema.validate({id: req.params.id})
 

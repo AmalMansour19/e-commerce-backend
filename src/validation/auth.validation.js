@@ -43,11 +43,12 @@ const forgotPasswordSchema = Joi.object({
     .required(),
 });
 
-export default {
+export {
   registerSchema,
   loginSchema,
   otpSchema,
   forgotPasswordSchema,
 };
+
 
 

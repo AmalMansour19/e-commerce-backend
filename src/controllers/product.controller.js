@@ -35,7 +35,7 @@ export async function CreateProduct(req, res) {
     });
 
     if (error) {
-      cleanUpImages(images);
+      await cleanUpImages(images);
 
       return res.status(400).send({
         success: false,
@@ -53,7 +53,7 @@ export async function CreateProduct(req, res) {
       product,
     });
   } catch (error) {
-    cleanUpImages(images);
+    await cleanUpImages(images);
 
     res
       .status(400)
@@ -76,14 +76,20 @@ export async function GetAllProducts(req, res) {
     const filter = {
       ...(category && { category }),
       ...(brand && { brand }),
-      ...(minPrice && {
-        price: {
-          ...(maxPrice && { $lte: maxPrice }),
-          $gte: minPrice,
-        },
-      }),
       ...(search && { name: { $regex: search, $options: "i" } }),
     };
+
+    if (!isNaN(minPrice) || !isNaN(maxPrice)) {
+      filter.price = {};
+
+      if (!isNaN(minPrice)) {
+        filter.price.$gte = minPrice;
+      }
+
+      if (!isNaN(maxPrice)) {
+        filter.price.$lte = maxPrice;
+      }
+    }
 
     const sortMap = {
       price_asc: { price: 1 },
@@ -156,7 +162,7 @@ export async function UpdateProduct(req, res) {
         imagesToDelete = JSON.parse(req.body.deletedImages);
       } catch (error) {
         if (newImages.length > 0) {
-          cleanUpImages(newImages);
+          await cleanUpImages(newImages);
         }
 
         return res.status(400).send({
@@ -186,7 +192,7 @@ export async function UpdateProduct(req, res) {
     });
 
     if (error) {
-      cleanUpImages(newImages);
+      await cleanUpImages(newImages);
 
       return res.status(400).send({
         success: false,
@@ -198,9 +204,7 @@ export async function UpdateProduct(req, res) {
     Object.assign(product, value);
     await product.save();
 
-    if (imagesToDelete.length > 0) {
-      await deleteImagesFromCloudinary(imagesToDelete);
-    }
+    await cleanUpImages(imagesToDelete);
 
     res.status(200).send({
       success: true,
@@ -208,7 +212,7 @@ export async function UpdateProduct(req, res) {
       product,
     });
   } catch (error) {
-    cleanUpImages(newImages);
+    await cleanUpImages(newImages);
 
     res
       .status(400)
@@ -226,7 +230,7 @@ export async function DeleteProduct(req, res) {
         .send({ success: false, message: "Product not found" });
     }
 
-    cleanUpImages(product.images || []);
+    await cleanUpImages(product.images || []);
 
     await Product.findByIdAndDelete(req.params.id);
 

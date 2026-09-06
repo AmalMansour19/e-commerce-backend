@@ -16,13 +16,11 @@ const createOrder = async (req, res, next) => {
             return next(error);
         }
 
-        cart.items.forEach((item) => {
-            if (!item.product){
-                const error = new Error("A product in your cart is no longer available");
-                error.statusCode = 400;
-                return next(error);
-            }
-        })
+      if (cart.items.some((item) => !item.product)) {
+            const error = new Error("A product in your cart is no longer available");
+            error.statusCode = 400;
+            return next(error);
+        }
 
         session = await mongoose.startSession();
         session.startTransaction();

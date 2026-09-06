@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const cartItemSchema = new mongoose.Schema({
   product: {
@@ -117,7 +117,7 @@ cartSchema.methods.calculateTotal = function () {
   const subtotal = this.calculateSubtotal();
   const discountAmount = this.calculateDiscountAmount();
 
-  return subtotal - discountAmount;
+  return Math.max(0, subtotal - discountAmount);
 };
 
 cartSchema.methods.calculateItemCount = function () {
@@ -126,4 +126,4 @@ cartSchema.methods.calculateItemCount = function () {
   return cart.items.reduce((total, item) => total + item.quantity, 0);
 };
 
-module.exports = mongoose.model("Cart", cartSchema);
+export default mongoose.model("Cart", cartSchema);

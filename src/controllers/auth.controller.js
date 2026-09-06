@@ -5,6 +5,7 @@ import {
   registerSchema,
   otpSchema,
   forgotPasswordSchema,
+   resetPasswordSchema,
 } from "../validation/auth.validation.js";
 import sendEmail from "../utils/sendEmail.js";
 import { forgotPasswordOtpTemplate } from "../templates/emailTemplates.js";
@@ -184,7 +185,7 @@ return res.status(200).json({ message: "OTP sent successfully" });
  } catch (error) {
     console.error(error);
     return res.status(500).json({
-        message: "Failed to verify OTP",
+        message: "Failed to send OTP",
         error: error.message,
     });
   }
@@ -193,7 +194,7 @@ return res.status(200).json({ message: "OTP sent successfully" });
 // POST /auth/forgotpassword/verify-otp
 export const verifyForgotPasswordOtp = async (req, res) => {
  try {
-    const { error } = otpSchema.validate(req.body);
+   const { error } = resetPasswordSchema.validate(req.body);
     if (error) {
       return res.status(400).json({
         message: error.details[0].message,

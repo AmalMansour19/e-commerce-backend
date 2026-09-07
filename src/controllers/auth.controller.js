@@ -4,9 +4,11 @@ import OTP from "../models/OTP.model.js";
 import {
   registerSchema,
   otpSchema,
+  forgotPasswordSchema,
+   resetPasswordSchema,
 } from "../validation/auth.validation.js";
 import sendEmail from "../utils/sendEmail.js";
-
+import { forgotPasswordOtpTemplate } from "../templates/emailTemplates.js";
 
 // POST /auth/register/send-otp
 export const sendOtp = async (req, res) => {
@@ -82,7 +84,6 @@ export const verifyOtp = async (req, res) => {
         message: error.details[0].message,
       });
     }
-
     const { email, otp } = req.body;
 
     // Find OTP
@@ -132,5 +133,115 @@ export const verifyOtp = async (req, res) => {
     });
   }
 };
+
+
+// POST /auth/forgotpassword/send-otp
+
+export const forgotPassword = async (req, res) => {
+  try {
+    const { error } = forgotPasswordSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        message: error.details[0].message,
+      });
+    }
+
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+  
+// Generate OTP
+
+const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+
+let textResetPassword = "Reset Your Password"
+    
+
+    // Delete old OTP for this email
+    await OTP.deleteMany({ email });
+
+    // Save otp data with OTP
+    await OTP.create({
+      email,
+      otp,
+      userData:user,
+    });
+
+
+
+// Send OTP
+await sendEmail(
+    email,
+    textResetPassword,
+    forgotPasswordOtpTemplate(otp),
+);
+
+return res.status(200).json({ message: "OTP sent successfully" });
+
+ } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+        message: "Failed to send OTP",
+        error: error.message,
+    });
+  }
+}
+
+// POST /auth/forgotpassword/verify-otp
+export const verifyForgotPasswordOtp = async (req, res) => {
+ try {
+   const { error } = resetPasswordSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        message: error.details[0].message,
+      });
+    }
+
+    const { email, otp , newPassword } = req.body;
+
+    // Find OTP
+    const findotp = await OTP.findOne({ email, otp });
+
+    if (!findotp) {
+        return res.status(404).json({status : "fail" , data : "Invalid OTP"})
+    }
+    // Check expiration
+    if (findotp.expiresAt < Date.now()) 
+        {
+        return res.status(404).json({status : "fail" , data : "OTP Expired"})
+    }
+    const user = await User.findOne({ email });
+    if (!user) {
+        return res.status(404).json({status : "fail" , data : "User not found"})
+    }   
+
+    // Update password
+    user.password = newPassword;
+    await user.save();      
+
+    // Delete used OTP
+    await OTP.deleteOne({ _id: findotp._id });
+
+    return res.status(200).json({
+        message: "OTP verified successfully",
+    });
+
+
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Failed to verify OTP",
+      error: error.message,
+    });
+
+  }
+}
+
+
 
 

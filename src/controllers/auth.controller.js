@@ -68,34 +68,41 @@ export const verifyOtp = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
-    if (!user) return res.status(401).json({ message: "Invalid credentials" });
-    if (!user.isVerified) return res.status(401).json({ message: "Please verify your email first" });
+
+    const user = await User.findOne({ email }).select("+password");
+
+    if (!user) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    if (!user.isVerified) {
+      return res.status(401).json({
+        message: "Please verify your email first",
+      });
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(401).json({ message: "Invalid credentials" });
 
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
 
-const token = generateToken(user._id);
+    const token = generateToken(user._id);
 
-return res.status(200).json({
-  message: "Login successful",
-  token,
-  user: {
-    id: user._id,
-    username: user.username,
-    email: user.email,
-  },
-});
-
-
-// GET /auth/me
-export const getMe = async (req, res) => {
-  try {
-    const user = await User.findById(req.user._id).select("-password");
-    return res.status(200).json({ user });
+    return res.status(200).json({
+      message: "Login successful",
+      token,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+      },
+    });
   } catch (error) {
-    return res.status(500).json({ message: "Failed to get user" });
+    return res.status(500).json({
+      message: "Login failed",
+      error: error.message,
+    });
   }
 };
 

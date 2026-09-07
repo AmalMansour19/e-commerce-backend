@@ -1,41 +1,29 @@
-const User = require('../models/User.model');
-const generateToken = require('../utils/generateToken');
+const jwt = require('jsonwebtoken');
+const User = require('./models/User.model'); 
+const bcrypt = require('bcryptjs');
 
 const login = async (req, res) => {
   const { email, password } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) return res.status(404).json({ message: "User not found" });
+  
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) return res.status(401).json({ message: "Invalid credentials" });
 
-  const user = await User.findOne({ email }).select('+password');
-  if (!user) {
-    return res.status(401).json({ message: 'Invalid credentials' });
-  }
-
-  const isMatch = await user.comparePassword(password);
-  if (!isMatch) {
-    return res.status(401).json({ message: 'Invalid credentials' });
-  }
-
-  const token = generateToken(user._id);
-
-  res.json({
-    token,
-    user: {
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-    },
-  });
+  const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
+  res.json({ token, user });
 };
 
 const getMe = async (req, res) => {
-
   const user = await User.findById(req.user._id);
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
   res.json(user);
 };
 
-// POST /auth/logout
 const logout = async (req, res) => {
-
-  res.json({ message: 'Logged out successfully' });
+  res.json({ message: "Logged out successfully" });
 };
 
 module.exports = { login, getMe, logout };

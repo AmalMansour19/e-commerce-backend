@@ -17,7 +17,7 @@ export const getWishlists = async (req, res, next) => {
 
 export const addProduct = async (req, res, next) => {
   try {
-    const { productId } = req.params.productId;
+    const { productId } = req.params;
 
     // Check if there is no product with productId
     const product = await Product.findById(productId);
@@ -63,7 +63,7 @@ export const addProduct = async (req, res, next) => {
 
 export const removeProduct = async (req, res, next) => {
   try {
-    const { productId } = req.params.productId;
+    const { productId } = req.params;
 
     // Check if there is no product with productId
     const product = await Product.findById(productId);
@@ -73,11 +73,11 @@ export const removeProduct = async (req, res, next) => {
       return next(error);
     }
 
-    const wishlist = await WishList.findOneAndUpdate({
-      user: req.user._id,
-      $pull: { products: productId },
-      new: true,
-    });
+    const wishlist = await WishList.findOneAndUpdate(
+      { user: req.user._id },
+      { $pull: { products: productId } },
+      { new: true },
+    );
 
     if (!wishlist) {
       const error = new Error("Wishlist not found");
@@ -96,13 +96,12 @@ export const removeProduct = async (req, res, next) => {
 };
 
 export const clearWishlist = async (req, res, next) => {
-  await WishList.findOneAndUpdate(
-    { user: req.user._id },
-    { $set: { products: [] } },
-  );
-
-  res.status(204).send();
   try {
+    await WishList.findOneAndUpdate(
+      { user: req.user._id },
+      { $set: { products: [] } },
+    );
+    res.status(204).send();
   } catch (err) {
     next(err);
   }

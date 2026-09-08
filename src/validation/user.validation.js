@@ -73,7 +73,7 @@ const userIdSchema = Joi.object({
     id: objectId.required(),
 });
 
-export default   {
+export   {
   createUserSchema,
   updateUserSchema,
   changePasswordSchema,

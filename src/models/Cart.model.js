@@ -50,7 +50,12 @@ const cartSchema = new mongoose.Schema({
       required: false,
     },
   },
-});
+},
+  {
+    toJSON: {virtuals: true},
+    toObject: {virtuals: true}
+  }
+);
 
 cartSchema.virtual("subtotal").get(function () {
   return this.calculateSubtotal();

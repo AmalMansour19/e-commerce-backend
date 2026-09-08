@@ -31,7 +31,7 @@ export const sendOtp = async (req, res) => {
       otp,
       userData: { username, email, password, phone },
     });
-    await sendEmail(email, "E-Commerce Verification Code", 'Your verification code is: ${otp}');
+    await sendEmail(email, "E-Commerce Verification Code", `Your verification code is: ${otp}`);
     return res.status(200).json({ message: "OTP sent successfully" });
   } catch (error) {
     console.error(error);
@@ -109,6 +109,22 @@ export const login = async (req, res) => {
     });
   }
 };
+
+
+export const getMe = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select("-password");
+
+    return res.status(200).json({
+      user,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Failed to get user",
+    });
+  }
+};
+
 
 // POST /auth/logout
 

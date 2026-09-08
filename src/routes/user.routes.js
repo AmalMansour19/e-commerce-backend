@@ -150,5 +150,5 @@ router.delete('/:id' , Admin , async (req , res) => {
         res.status(500).send(e)
     }
 })
-
+export default router;
 //End

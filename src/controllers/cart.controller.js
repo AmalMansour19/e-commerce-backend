@@ -1,5 +1,6 @@
-import Cart from "../models/cart.model.js";
-import Product from "../models/product.model.js";
+import Cart from "../models/Cart.model.js";
+import Product from "../models/Product.model.js";
+import coupons from "../utils/coupons.js";
 
 
 const getCart=async(req,res,next)=>{
@@ -34,7 +35,7 @@ const addItemToCart=async (req,res,next)=>{
      error.statusCode=400;
      return next(error);
     }
-    
+
     const product = await Product.findById(productId);
     if(!product){
         const error =new Error("Product not found");
@@ -116,7 +117,7 @@ const updateItemQuantity=async(req,res,next)=>{
     }
     const oldQuantity=item.quantity;
     const quantityDifference=quantity-oldQuantity;
-    
+
 
     if(quantityDifference>0){
         if(product.stock<quantityDifference){
@@ -130,7 +131,7 @@ const updateItemQuantity=async(req,res,next)=>{
         product.stock+=Math.abs(quantityDifference);
 
     }
-    
+
     item.quantity=quantity;
 
     await cart.save();
@@ -143,7 +144,7 @@ res.status(200).json({
     message:"Cart item quantity updated successfully!",
     cart,
 })
-  
+
 
 
     }catch(error){
@@ -154,7 +155,7 @@ res.status(200).json({
 const removeItemFromCart =async (req,res,next)=>{
     try{
       const{productId}=req.params;
-      
+
     let cart=await Cart.findOne({user:req.user._id});
     if(!cart){
         const error=new Error("Cart not found");
@@ -224,5 +225,70 @@ const clearCart= async(req,res,next)=>{
     }
 }
 
+const applyCoupon = async (req, res, next) => {
+  try {
+    const { code } = req.body;
 
-export {getCart,addItemToCart,updateItemQuantity,removeItemFromCart,clearCart};
+    const coupon = coupons[code?.toUpperCase()];
+
+    if (!coupon) {
+      const error = new Error("Invalid coupon code");
+      error.statusCode = 400;
+      return next(error);
+    }
+
+    const cart = await Cart.findOne({
+      user: req.user._id,
+    });
+
+    if (!cart) {
+      const error = new Error("Cart not found");
+      error.statusCode = 404;
+      return next(error);
+    }
+
+    cart.coupon = {
+      code: code.toUpperCase(),
+      discountType: coupon.discountType,
+      discountValue: coupon.discountValue,
+    };
+
+    await cart.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Coupon applied successfully",
+      cart,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const removeCoupon = async (req, res, next) => {
+  try {
+    const cart = await Cart.findOne({
+      user: req.user._id,
+    });
+
+    if (!cart) {
+      const error = new Error("Cart not found");
+      error.statusCode = 404;
+      return next(error);
+    }
+
+    cart.coupon = undefined;
+
+    await cart.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Coupon has removed successfully",
+      cart,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export {getCart,addItemToCart,updateItemQuantity,removeItemFromCart,clearCart, applyCoupon, removeCoupon};

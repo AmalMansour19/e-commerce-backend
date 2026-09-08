@@ -1,6 +1,6 @@
-//import bcryptjs from "bcryptjs";
 import User from "../models/User.model.js";
 import OTP from "../models/OTP.model.js";
+import bcrypt from "bcryptjs";
 import {
   registerSchema,
   otpSchema,
@@ -8,131 +8,132 @@ import {
    resetPasswordSchema,
 } from "../validation/auth.validation.js";
 import sendEmail from "../utils/sendEmail.js";
+import generateToken from "../utils/generateToken.js";
+
 import { forgotPasswordOtpTemplate } from "../templates/emailTemplates.js";
 
 // POST /auth/register/send-otp
 export const sendOtp = async (req, res) => {
   try {
-    // Validation
     const { error } = registerSchema.validate(req.body);
-
     if (error) {
-      return res.status(400).json({
-        message: error.details[0].message,
-      });
+      return res.status(400).json({ message: error.details[0].message });
     }
-
     const { username, email, password, phone } = req.body;
-
-    // Check if user already exists
     const existingUser = await User.findOne({ email });
-
     if (existingUser) {
-      return res.status(409).json({
-        message: "Email already registered",
-      });
+      return res.status(409).json({ message: "Email already registered" });
     }
-
-    // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
-    // Delete old OTP for this email
     await OTP.deleteMany({ email });
-
-    // Save registration data with OTP
     await OTP.create({
       email,
       otp,
-      userData: {
-        username,
-        email,
-        password,
-        phone,
-      },
+      userData: { username, email, password, phone },
     });
-
-    // Send OTP
-    await sendEmail(
-      email,
-      "E-Commerce Verification Code",
-      `Your verification code is: ${otp}`
-    );
-
-    return res.status(200).json({
-      message: "OTP sent successfully",
-    });
-
+    await sendEmail(email, "E-Commerce Verification Code", `Your verification code is: ${otp}`);
+    return res.status(200).json({ message: "OTP sent successfully" });
   } catch (error) {
     console.error(error);
-
-    return res.status(500).json({
-      message: "Failed to send OTP",
-      error: error.message,
-    });
+    return res.status(500).json({ message: "Failed to send OTP", error: error.message });
   }
 };
-
 
 // POST /auth/verify-otp
 export const verifyOtp = async (req, res) => {
   try {
-    // Validation
     const { error } = otpSchema.validate(req.body);
-
     if (error) {
-      return res.status(400).json({
-        message: error.details[0].message,
-      });
+      return res.status(400).json({ message: error.details[0].message });
     }
     const { email, otp } = req.body;
-
-    // Find OTP
     const otpRecord = await OTP.findOne({ email, otp });
-
     if (!otpRecord) {
-      return res.status(400).json({
-        message: "Invalid OTP",
-      });
+      return res.status(400).json({ message: "Invalid OTP" });
     }
-
-    // Check expiration
     if (otpRecord.expiresAt < new Date()) {
       await OTP.deleteOne({ _id: otpRecord._id });
+      return res.status(400).json({ message: "OTP expired" });
+    }
+    const user = await User.create({...otpRecord.userData, isVerified: true });
+    await OTP.deleteOne({ _id: otpRecord._id });
+    return res.status(201).json({
+      message: "User registered and verified successfully",
+      user: { id: user._id, username: user.username, email: user.email, phone: user.phone, isVerified: user.isVerified },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Failed to verify OTP", error: error.message });
+  }
+};
 
-      return res.status(400).json({
-        message: "OTP expired",
+
+// POST /auth/login
+export const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ email }).select("+password");
+
+    if (!user) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    if (!user.isVerified) {
+      return res.status(401).json({
+        message: "Please verify your email first",
       });
     }
 
-    // Create user after successful verification
-    const user = await User.create({
-      ...otpRecord.userData,
-      isVerified: true,
-    });
+    const isMatch = await bcrypt.compare(password, user.password);
 
-    // Delete used OTP
-    await OTP.deleteOne({ _id: otpRecord._id });
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
 
-    return res.status(201).json({
-      message: "User registered and verified successfully",
+    const token = generateToken(user._id);
+
+    return res.status(200).json({
+      message: "Login successful",
+      token,
       user: {
         id: user._id,
         username: user.username,
         email: user.email,
-        phone: user.phone,
-        isVerified: user.isVerified,
       },
     });
-
   } catch (error) {
-    console.error(error);
-
     return res.status(500).json({
-      message: "Failed to verify OTP",
+      message: "Login failed",
       error: error.message,
     });
   }
 };
+
+
+export const getMe = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select("-password");
+
+    return res.status(200).json({
+      user,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Failed to get user",
+    });
+  }
+};
+
+
+// POST /auth/logout
+
+export const logout = async (req, res) => {
+  return res.status(200).json({
+    message: "Logged out successfully",
+  });
+};
+
 
 
 // POST /auth/forgotpassword/send-otp

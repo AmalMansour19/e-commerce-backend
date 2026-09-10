@@ -21,6 +21,27 @@ const createPaymentIntent = async (req, res, next) => {
             error.statusCode = 400;
             return next(error);
         }
+        if (order.paymentStatus === "paid") {
+        const error = new Error("Order is already paid");
+        error.statusCode = 400;
+        return next(error);
+        }
+
+         if (order.transactionId) {
+            const paymentIntent = await stripe.paymentIntents.retrieve(
+                order.transactionId
+            );
+        
+            if (paymentIntent.status !== "canceled") {
+                return res.status(200).json({
+                    success: true,
+                    paymentIntentId: paymentIntent.id,
+                    clientSecret: paymentIntent.client_secret,
+                    status: paymentIntent.status,
+                });
+            }
+        }
+
 
         const paymentIntent = await stripe.paymentIntents.create({
           amount: Math.round(order.totalPrice * 100),

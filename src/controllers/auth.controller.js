@@ -31,7 +31,12 @@ export const sendOtp = async (req, res) => {
       otp,
       userData: { username, email, password, phone },
     });
-    await sendEmail(email, "E-Commerce Verification Code", `Your verification code is: ${otp}`);
+   await sendEmail({
+      to: email,
+      subject: "E-Commerce Verification Code",
+      html: `Your verification code is: ${otp}`,
+    });
+    
     return res.status(200).json({ message: "OTP sent successfully" });
   } catch (error) {
     console.error(error);
@@ -159,7 +164,7 @@ export const forgotPassword = async (req, res) => {
 const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
 
-let textResetPassword = "Reset Your Password"
+const textResetPassword = "Reset Your Password";
     
 
     // Delete old OTP for this email
@@ -175,11 +180,11 @@ let textResetPassword = "Reset Your Password"
 
 
 // Send OTP
-await sendEmail(
-    email,
-    textResetPassword,
-    forgotPasswordOtpTemplate(otp),
-);
+await sendEmail({
+  to: email,
+  subject: textResetPassword,
+  html: forgotPasswordOtpTemplate(otp),
+});
 
 return res.status(200).json({ message: "OTP sent successfully" });
 

@@ -491,15 +491,17 @@ const deleteReview = async (req, res, next) => {
       });
     }
 
-    const userId = req.user._id || req.user.id || req.user.userId;
+    const userId = req.user._id;
 
-    if (review.user.toString() !== userId.toString()) {
+    const isOwner = review.user.toString() === userId.toString();
+    const isAdmin = req.user.role === "admin";
+    
+    if (!isOwner && !isAdmin) {
       return res.status(403).json({
         success: false,
         message: "Not authorized to delete this review",
       });
     }
-
     review.deleteOne();
 
     product.calcAverageRating();

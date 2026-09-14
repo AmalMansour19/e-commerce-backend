@@ -67,7 +67,7 @@ const createOrder = async (req, res, next) => {
         next(error);
     } finally {
         if (session) {
-            session.endSession();
+           await session.endSession();
         }
     }
 }

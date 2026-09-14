@@ -32,6 +32,16 @@ router.get("/", GetAllProducts);
 // Search + Filter + Sort + Pagination
 router.get("/search", getProducts);
 
+// Update Product
+router.put(
+  "/update/:id",
+  auth,
+  adminPerms,
+  upload.array("images", 5),
+  UpdateProduct
+);
+
+
 // Product by ID
 router.get("/:id", GetProductById);
 
@@ -50,13 +60,7 @@ router.delete(
   deleteReview
 );
 
-router.patch(
-  "/update/:id",
-  auth,
-  adminPerms,
-  upload.array("images", 5),
-  UpdateProduct
-);
+
 
 router.delete(
   "/:id",

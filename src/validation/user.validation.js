@@ -20,7 +20,7 @@ const addressSchema = Joi.object({
 //Create New User
 
 const createUserSchema = Joi.object({
-    username: Joi.string().trim().min(2).max(50).required().messages({ 'any.required': 'Username is required' }),
+    username: Joi.string().trim().min(3).max(30).required().messages({ 'any.required': 'Username is required' }),
 
     email: Joi.string().email().lowercase().required().messages({ 'string.email': 'Please enter a valid email' }),
 

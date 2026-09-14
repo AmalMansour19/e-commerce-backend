@@ -1,5 +1,4 @@
 import { Router } from "express";
-
 import auth from "../middleware/auth.middleware.js";
 import adminPerms from "../middleware/admin.middleware.js";
 
@@ -24,7 +23,6 @@ router.get(
 );
 
 // Admin Carts
-
 router.get(
   "/carts",
   auth,
@@ -41,7 +39,6 @@ router.get(
 );
 
 // Wishlist Statistics
-
 router.get(
   "/wishlists/stats",
   auth,

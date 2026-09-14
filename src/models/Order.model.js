@@ -9,6 +9,12 @@ user:{
 items:{
     type:[
      {
+        product:{
+          type:
+          mongoose.Schema.Types.ObjectId,
+          ref:"producr",
+          required:false,
+        },
         name:{
             type:String,
             required:true

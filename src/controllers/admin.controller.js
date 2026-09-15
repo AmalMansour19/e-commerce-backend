@@ -151,6 +151,11 @@ const getDashboard = async (req, res, next) => {
 
   //Get the top 5 best-selling products
   const topProducts = await Order.aggregate([
+     {
+    $match: {
+      status: { $nin: ["cancelled", "returned"] },
+    },
+  },
     {
       $unwind: "$items",
     },

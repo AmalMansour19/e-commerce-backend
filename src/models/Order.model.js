@@ -12,7 +12,7 @@ items:{
         product:{
           type:
           mongoose.Schema.Types.ObjectId,
-          ref:"producr",
+          ref:"Product",
           required:false,
         },
         name:{

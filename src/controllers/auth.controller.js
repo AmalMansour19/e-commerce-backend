@@ -213,16 +213,23 @@ export const verifyForgotPasswordOtp = async (req, res) => {
     const findotp = await OTP.findOne({ email, otp });
 
     if (!findotp) {
-        return res.status(404).json({status : "fail" , data : "Invalid OTP"})
-    }
-    // Check expiration
-    if (findotp.expiresAt < Date.now()) 
-        {
-        return res.status(404).json({status : "fail" , data : "OTP Expired"})
-    }
+          return res.status(400).json({
+            success: false,
+            message: "Invalid OTP",
+          });
+        }
+        
+        if (findotp.expiresAt < Date.now()) {
+          await OTP.deleteOne({ _id: findotp._id });
+        
+          return res.status(400).json({
+            success: false,
+            message: "OTP expired",
+          });
+        }
     const user = await User.findOne({ email });
     if (!user) {
-        return res.status(404).json({status : "fail" , data : "User not found"})
+        return res.status(404).json({success : "fail" , message : "User not found"})
     }   
 
     // Update password
@@ -242,7 +249,6 @@ export const verifyForgotPasswordOtp = async (req, res) => {
 
     return res.status(500).json({
       message: "Failed to verify OTP",
-      error: error.message,
     });
 
   }

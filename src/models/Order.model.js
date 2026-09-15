@@ -9,12 +9,12 @@ user:{
 items:{
     type:[
      {
-        product:{
-          type:
-          mongoose.Schema.Types.ObjectId,
-          ref:"Product",
-          required:false,
-        },
+
+         product: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Product",
+                required: true
+            },
         name:{
             type:String,
             required:true

@@ -85,7 +85,7 @@ const updateItemQuantity=async(req,res,next)=>{
     try{
     const {productId,quantity}=req.body;
 
-    if(!productId || !quantity ||quantity<=0){
+    if(!productId || !quantity ||quantity<=0 || !Number.isInteger(quantity) ){
      const  error=new Error("ProductId and quantity are required and quantity should be greater than 0");
      error.statusCode=400;
      return next(error);

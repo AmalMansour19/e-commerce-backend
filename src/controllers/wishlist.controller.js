@@ -67,11 +67,7 @@ export const removeProduct = async (req, res, next) => {
 
     // Check if there is no product with productId
     const product = await Product.findById(productId);
-    if (!product) {
-      const error = new Error("Product not found");
-      error.statusCode = 404;
-      return next(error);
-    }
+
 
     const wishlist = await WishList.findOneAndUpdate(
       { user: req.user._id },

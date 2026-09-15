@@ -46,7 +46,8 @@ const productValidation = Joi.object({
     
   //Optional fields
   discountPrice:Joi.number()
-    .min(0),
+  .min(0)
+  .less(Joi.ref("price")),
 
   sku:Joi.string(),
 
@@ -57,23 +58,6 @@ const productValidation = Joi.object({
   tags:Joi.array()
     .items(Joi.string()),
 
-  reviews:Joi.array()
-    .items(
-      Joi.object({
-        user:Joi.string()
-          .pattern(/^[0-9a-fA-F]{24}$/)
-          .required(),
-
-        rating:Joi.number()
-          .min(1)
-          .max(5)
-          .required(),
-
-        comment:Joi.string()
-          .required(),
-
-        })
-      ),
 
     featured:Joi.boolean()
       .default(false),

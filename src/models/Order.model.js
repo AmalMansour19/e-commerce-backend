@@ -9,6 +9,7 @@ user:{
 items:{
     type:[
      {
+
          product: {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: "Product",

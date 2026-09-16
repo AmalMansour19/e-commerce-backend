@@ -10,23 +10,26 @@ import sendEmail from "../utils/sendEmail.js";
 const getDashboard = async (req, res, next) => {
   try {
 
-    //Calculate total revenue from paid orders
-    const revenue = await Order.aggregate([
-      {
-        $match: {
-          paymentStatus: "paid",
-        },
+ // Calculate total revenue from paid orders
+const revenueResult = await Order.aggregate([
+  {
+    $match: {
+      paymentStatus: "paid",
+    },
+  },
+  {
+    $group: {
+      _id: null,
+      totalRevenue: {
+        $sum: "$totalPrice",
       },
-      {
-        $group: {
-          _id: null,
-          totalRevenue: {
-            $sum: "$totalPrice",
-          },
-        },
-      },
-    ]);
-    // Calculate current month revenue
+    },
+  },
+]);
+
+const revenue = revenueResult[0]?.totalRevenue || 0;
+
+    
     const now = new Date();
 
       const startOfCurrentMonth = new Date(
@@ -160,13 +163,18 @@ const getDashboard = async (req, res, next) => {
       $unwind: "$items",
     },
     {
-      $group: {
-       _id: "$items.name",
-        totalSold: {
-        $sum: "$items.quantity",
-          },
-        },
+  $group: {
+    _id: "$items.name",
+    totalSold: {
+      $sum: "$items.quantity",
+    },
+    totalRevenue: {
+      $sum: {
+        $multiply: ["$items.price", "$items.quantity"],
       },
+    },
+  },
+},
       {
         $sort: {
           totalSold: -1,
@@ -338,7 +346,7 @@ const getWishlistStats = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: "Wishlist statistics fetched successfully",
-      stats,
+     topProducts: stats,
     });
   } catch (error) {
     next(error);
@@ -356,6 +364,9 @@ const getAllOrders = async (req, res, next) => {
       sort = "createdAt",
       order = "desc",
     } = req.query;
+    const page = Math.max(Number(req.query.page) || 1, 1);
+    const limit = Math.max(Number(req.query.limit) || 10, 1);
+    const skip = (page - 1) * limit;
 
     const filter = {};
 
@@ -389,17 +400,24 @@ const getAllOrders = async (req, res, next) => {
     // Sorting
   const sortOrder = order === "asc" ? 1 : -1;
 
-  const orders = await Order.find(filter).sort({
-      [sort]: sortOrder,
-    });
+      const [orders, totalOrders] = await Promise.all([
+      Order.find(filter)
+        .sort({ [sort]: sortOrder })
+        .skip(skip)
+        .limit(limit),
+      Order.countDocuments(filter),
+    ]);
 
-    res.status(200).json({
-      success: true,
-      message: "Orders fetched successfully",
-      count: orders.length,
-      orders,
-    });
-   } catch (error) {
+const totalPages = Math.ceil(totalOrders / limit);
+
+   res.status(200).json({
+  success: true,
+  orders,
+  totalOrders,
+  currentPage: page,
+  totalPages,
+});
+  } catch (error) {
     next(error);
    }
   };

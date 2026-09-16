@@ -14,9 +14,8 @@ let wishListSchema = new mongoose.Schema({
 
 }) ;
 
-wishListSchema.pre(/^find/,function(next){
+wishListSchema.pre(/^find/,function(){
     this.populate("products")
-    next()
 })
 
 const WishList=mongoose.models.wishList||

@@ -288,7 +288,7 @@ export async function UpdateProduct(req, res) {
   let newImages = [];
 
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findById(req.params.id).lean();
 
     if (!product) {
       return res
@@ -345,15 +345,20 @@ export async function UpdateProduct(req, res) {
       });
     }
 
-    Object.assign(product, value);
-    await product.save();
+      const updatedProduct = await Product.findByIdAndUpdate(
+      req.params.id,
+      { $set: value },
+      { new: true, runValidators: true }
+      );
+
+
 
     await cleanUpImages(imagesToDelete);
 
     res.status(200).send({
       success: true,
       message: "Product updated successfully",
-      product,
+      product:updatedProduct,
     });
   } catch (error) {
     await cleanUpImages(newImages);

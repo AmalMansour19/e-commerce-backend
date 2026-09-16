@@ -33,7 +33,7 @@ router.get("/", GetAllProducts);
 router.get("/search", getProducts);
 
 // Update Product
-router.put(
+router.patch(
   "/update/:id",
   auth,
   adminPerms,

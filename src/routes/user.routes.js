@@ -40,7 +40,7 @@ router.get(
   "/:id",
   authMiddleware,
   adminMiddleware,
-  validate(userIdSchema),
+  validate(userIdSchema, "params"),
   getUserById
 );
 
@@ -54,8 +54,8 @@ router.patch(
 router.patch(
   "/:id",
   authMiddleware,
-  validate(userIdSchema),
-  validate(updateUserSchema),
+  validate(userIdSchema, "params"),
+  validate(updateUserSchema, "body"),
   updateUser
 );
 
@@ -63,7 +63,7 @@ router.delete(
   "/:id",
   authMiddleware,
   adminMiddleware,
-  validate(userIdSchema),
+  validate(userIdSchema, "params"),
   deleteUser
 );
 

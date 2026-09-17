@@ -1,6 +1,6 @@
-const validate = (schema) => {
+const validate = (schema , source = "body") => {
   return (req, res, next) => {
-    const { error } = schema.validate(req.body, {
+    const { error } = schema.validate(req[source], {
       abortEarly: false,
     });
 
@@ -19,5 +19,5 @@ const validate = (schema) => {
   };
 };
 
-module.exports = validate;
+export default validate;
 

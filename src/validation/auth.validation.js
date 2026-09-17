@@ -1,4 +1,4 @@
-const Joi = require("joi");
+import Joi from "joi";
 
 const registerSchema = Joi.object({
   username: Joi.string()
@@ -14,8 +14,7 @@ const registerSchema = Joi.object({
     .min(8)
     .required(),
 
-  phone: Joi.string()
-    .required(),
+  phone: Joi.string(),
 });
 
 const loginSchema = Joi.object({
@@ -44,11 +43,28 @@ const forgotPasswordSchema = Joi.object({
     .required(),
 });
 
-module.exports = {
+const resetPasswordSchema = Joi.object({
+  email: Joi.string()
+    .email()
+    .required(),
+
+  otp: Joi.string()
+    .length(6)
+    .pattern(/^[0-9]+$/)
+    .required(),
+
+  newPassword: Joi.string()
+    .min(8)
+    .required(),
+});
+
+export {
   registerSchema,
   loginSchema,
   otpSchema,
   forgotPasswordSchema,
+  resetPasswordSchema,
 };
+
 
 

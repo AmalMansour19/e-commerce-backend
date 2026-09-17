@@ -1,16 +1,52 @@
-const express= require("express")
-const cors = require("cors")
-const app= express()
+import express from "express";
+import cors from "cors";
+import auth from "./middleware/auth.middleware.js";
 
+import authRoutes from "./routes/auth.routes.js";
+import userRoutes from "./routes/user.routes.js";
+import productRoutes from "./routes/product.routes.js";
+import cartRoutes from "./routes/cart.routes.js";
+import wishlistRoutes from "./routes/wishlist.routes.js";
+import orderRoutes from "./routes/order.routes.js";
+import paymentRoutes from "./routes/payment.routes.js";
+import adminRoutes from "./routes/admin.routes.js";
+import { stripeWebhook } from "./controllers/payment.controller.js";
 
-app.use(cors())
-app.use(express.json())
+const app = express();
 
+app.use(cors());
 
-app.get("/", (req,res)=>{
+// Stripe Webhook
+app.post(
+    "/api/payments/webhook",
+    express.raw({ type: "application/json" }),
+    stripeWebhook
+);
+
+app.use(express.json());
+
+app.use("/auth", authRoutes);
+app.use("/users", userRoutes);
+app.use("/products", productRoutes);
+app.use("/carts", auth, cartRoutes);
+app.use("/wishlists", wishlistRoutes);
+app.use("/orders", orderRoutes);
+app.use("/payments", paymentRoutes);
+app.use("/admin", adminRoutes);
+app.get("/", (req, res) => {
     res.json({
         message: "E-Commerce API is running",
-    })
-})
+    });
+});
 
-module.exports= app
+app.use((err, req, res, next) => {
+    const statusCode = err.statusCode || 500;
+
+    res.status(statusCode).json({
+        success: false,
+        message: err.message || "Internal Server Error",
+    });
+});
+
+
+export default app;
